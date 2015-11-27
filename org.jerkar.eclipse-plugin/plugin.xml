@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.jerkar.eclipseplugin.commands.GenerateMetadataFilesHandler"
+            id="org.jerkar.eclipse-plugin.generateFilesCommand"
+            name="Update Classpath">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="true"
+            locationURI="popup:org.eclipse.jdt.ui.source.menu">
+         <command
+               commandId="org.jerkar.eclipse-plugin.generateMetadataFilesCommand"
+               label="Update Classpath"
+               style="push">
+         </command>
+      </menuContribution>
+   </extension>
+
+
+</plugin>
