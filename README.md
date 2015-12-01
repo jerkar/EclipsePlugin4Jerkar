@@ -1,6 +1,4 @@
-# eclipsePlugin4Jerkar
-
-An Eclipse plugin to for Jerkar.
+# An Eclipse plugin to for Jerkar
 
 As pure java tool, Jerkar does not need specific tooling to be used kindly in an IDE. Neverthless, some task as scaffolding projectd or updating classpath 
 are welcome to be integrated in IDE menu for even better user experience.
