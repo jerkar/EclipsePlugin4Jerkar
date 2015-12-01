@@ -13,7 +13,8 @@ public class JerkarHelper {
 		List<String> cmd = new LinkedList<>();
 		cmd.add(cmd());
 		cmd.addAll(Arrays.asList(commands));
-		return new ProcessBuilder(cmd);
+		ProcessBuilder builder = new ProcessBuilder(cmd);
+		return builder;
 	}
 	
 	public static final File jerkarHome() {

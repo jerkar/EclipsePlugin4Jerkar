@@ -10,8 +10,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.jerkar.eclipseplugin.utils.ConsoleHelper;
 import org.jerkar.eclipseplugin.utils.JerkarHelper;
+import org.jerkar.eclipseplugin.utils.ConsoleHelper.StreamGobbler;
 
 public class ScaffoldClassicJavaHandler extends AbstractHandler {
 
@@ -29,13 +32,25 @@ public class ScaffoldClassicJavaHandler extends AbstractHandler {
 				File file = path.toFile();
 				ProcessBuilder builder = JerkarHelper.processBuilder("scaffold", "eclipse#");
 				builder.directory(file);
+				
 				try {
-					builder.start().waitFor();
+					MessageConsole console = ConsoleHelper.console();
+					Process process = builder.start();
+					ConsoleHelper.bringToFront(console);
+					final StreamGobbler outputStreamGobbler = new StreamGobbler(process.getInputStream(), 
+							console.newOutputStream());
+		            final StreamGobbler errorStreamGobbler = new StreamGobbler(process.getErrorStream(), 
+							console.newOutputStream());
+		            process.waitFor();
+		            outputStreamGobbler.stop();
+		            errorStreamGobbler.stop();
+					javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
 				} catch (Exception e) {
 					throw new ExecutionException(
 							"Error while generating Eclipse .classpath file.",
 							e);
 				}
+				
 			}
 		}
 		return null;
