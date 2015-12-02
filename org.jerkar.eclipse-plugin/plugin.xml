@@ -18,6 +18,7 @@
             allPopups="true"
             locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
          <menu
+               icon="media/jk.png"
                label="Jerkar">
             <command
                   commandId="org.jerkar.eclipse-plugin.commands.updateclasspath"
