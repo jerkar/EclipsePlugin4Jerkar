@@ -1,7 +1,6 @@
 package org.jerkar.eclipseplugin.commands;
 
 import java.io.File;
-import java.io.OutputStream;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -14,8 +13,8 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jerkar.eclipseplugin.utils.ConsoleHelper;
-import org.jerkar.eclipseplugin.utils.JerkarHelper;
 import org.jerkar.eclipseplugin.utils.ConsoleHelper.StreamGobbler;
+import org.jerkar.eclipseplugin.utils.JerkarHelper;
 
 class JerkarExecutor {
 	
