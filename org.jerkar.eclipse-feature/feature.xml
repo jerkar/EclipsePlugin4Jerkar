@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.jerkar.eclipse_feature"
-      label="Eclipse_feature"
+      label="Jerkar"
       version="0.1.0"
       provider-name="org.jerkar">
 
