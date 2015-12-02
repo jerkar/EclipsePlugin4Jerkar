@@ -96,6 +96,7 @@ public class ConsoleHelper {
 						final byte[] bytes = line.getBytes();
 						out.write(bytes, 0, bytes.length);
 						out.write('\n');
+						out.flush();
 					}
 				} catch (final IOException e) {
 					throw new RuntimeException(e);

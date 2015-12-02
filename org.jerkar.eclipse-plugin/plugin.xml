@@ -11,6 +11,10 @@
             id="org.jerkar.eclipse-plugin.commands.scaffold.javabuild"
             name="ScaffoldClassicJava">
       </command>
+      <command
+            id="org.jerkar.eclipse-plugin.commands.scaffold.springbootbuild"
+            name="ScaffoldSpringboot">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -29,7 +33,12 @@
                   label="Scaffold">
                <command
                      commandId="org.jerkar.eclipse-plugin.commands.scaffold.javabuild"
-                     label="Scaffold Classic Java Project"
+                     label="Classic Java Project"
+                     style="push">
+               </command>
+               <command
+                     commandId="org.jerkar.eclipse-plugin.commands.scaffold.springbootbuild"
+                     label="Spring-Boot Project"
                      style="push">
                </command>
             </menu>
@@ -45,6 +54,10 @@
       <handler
             class="org.jerkar.eclipseplugin.commands.ScaffoldClassicJavaHandler"
             commandId="org.jerkar.eclipse-plugin.commands.scaffold.javabuild">
+      </handler>
+      <handler
+            class="org.jerkar.eclipseplugin.commands.ScaffoldSpringbootHandler"
+            commandId="org.jerkar.eclipse-plugin.commands.scaffold.springbootbuild">
       </handler>
    </extension>
 </plugin>

@@ -24,7 +24,7 @@ public class ClasspathVariableSetter {
 			}
 		}
 		if (!varNames.contains(JERKAR_REPO)) {
-			Path repoPath = new Path(System.getProperty("user.dir") + "/cache/repo");
+			Path repoPath = new Path(System.getProperty("user.home") + "/.jerkar/cache/repo");
 			JavaCore.setClasspathVariable(JERKAR_REPO, repoPath, null);
 		}
 	}

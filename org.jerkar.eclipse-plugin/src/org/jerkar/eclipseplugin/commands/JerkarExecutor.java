@@ -1,6 +1,7 @@
 package org.jerkar.eclipseplugin.commands;
 
 import java.io.File;
+import java.io.OutputStream;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -10,6 +11,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jerkar.eclipseplugin.utils.ConsoleHelper;
 import org.jerkar.eclipseplugin.utils.JerkarHelper;
@@ -33,15 +35,17 @@ class JerkarExecutor {
 				
 				try {
 					MessageConsole console = ConsoleHelper.console();
+					MessageConsoleStream consoleOutputStream = console.newMessageStream();
+					consoleOutputStream.setActivateOnWrite(true);
 					Process process = builder.start();
-					ConsoleHelper.bringToFront(console);
 					final StreamGobbler outputStreamGobbler = new StreamGobbler(process.getInputStream(), 
-							console.newOutputStream());
+							consoleOutputStream);
 		            final StreamGobbler errorStreamGobbler = new StreamGobbler(process.getErrorStream(), 
-							console.newOutputStream());
+		            		consoleOutputStream);
 		            process.waitFor();
 		            outputStreamGobbler.stop();
 		            errorStreamGobbler.stop();
+		            consoleOutputStream.close();
 					javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
 				} catch (Exception e) {
 					throw new ExecutionException(
