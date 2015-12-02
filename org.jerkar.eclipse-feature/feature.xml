@@ -5,16 +5,17 @@
       version="0.1.2"
       provider-name="org.jerkar">
 
-   <description url="http://www.example.com/description">
-      [Enter Feature Description here.]
+   <description>
+      Add contextual menu to project view, in order to launch Jerkar commands from here.
    </description>
 
-   <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
+   <copyright>
+      jerkar.org Open Source
+Copyright individual contributors as indicated by the @authors tag, 2014.
    </copyright>
 
-   <license url="http://www.example.com/license">
-      [Enter License Description here.]
+   <license url="http://www.apache.org/licenses/LICENSE-2.0">
+      Apache 2 License.
    </license>
 
    <requires>
