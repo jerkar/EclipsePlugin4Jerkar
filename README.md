@@ -7,4 +7,8 @@ For now, this plugin provides a "Jerkar" menu extension when right clicking on a
 * Update classpath : this will align Eclipse .classpath with the dependencies declared in Jerkar for the concerned project.
 * Scaffold projects : this will create folder structure along a basic build class for starting up projects. 
 
+<br/>
+<br/>
+
+
 <img src="http://project.jerkar.org/eclipsePlugin4Jerkar/img/screenshot.png"/>
