@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
+   <description url="file://C:\UserTemp\I19451\git\eclipsePlugin4Jerkar-gh-pages\site">
+      fd
+   </description>
    <feature url="features/org.jerkar.eclipse_feature_0.1.2.jar" id="org.jerkar.eclipse_feature" version="0.1.2"/>
 </site>
