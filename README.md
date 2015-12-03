@@ -2,7 +2,7 @@
 
 As pure java tool, Jerkar does not need specific tooling to be used kindly in an IDE. Neverthless, some task as scaffolding projects or updating build path are welcome to be integrated in IDE menu for even better user experience.
 
-The plugin can be instaled using the site update : <i>http://project.jerkar.org/eclipsePlugin4Jerkar/site<i> .
+The plugin can be instaled using the site update : <i>http://project.jerkar.org/eclipsePlugin4Jerkar/site</i> .
 
 For now, this plugin provides a "Jerkar" menu extension when right clicking on a project :
 
