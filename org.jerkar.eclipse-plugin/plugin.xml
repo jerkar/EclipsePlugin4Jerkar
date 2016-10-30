@@ -16,14 +16,16 @@
             name="ScaffoldSpringboot">
       </command>
    </extension>
-   <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="true"
-            locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
-         <menu
-               icon="media/jk.png"
-               label="Jerkar">
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution allPopups="true" locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
+         <menu icon="media/jk.png" label="Jerkar">
+            <menu
+                  label="Launch">
+               <dynamic
+               		class="org.jerkar.eclipseplugin.menu.LaunchMenu"
+                    id="org.jerkar.eclipseplugin.menu.LaunchMenu">
+               </dynamic>
+            </menu>
             <command
                   commandId="org.jerkar.eclipse-plugin.commands.updateclasspath"
                   label="Update Classpath"
@@ -41,7 +43,8 @@
                      label="Spring-Boot Project"
                      style="push">
                </command>
-            </menu>
+             </menu>
+             
          </menu>
       </menuContribution>
    </extension>
