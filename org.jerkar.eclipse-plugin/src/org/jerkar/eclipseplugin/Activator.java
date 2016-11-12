@@ -2,6 +2,7 @@ package org.jerkar.eclipseplugin;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.jerkar.eclipseplugin.menu.MethodShell;
 import org.jerkar.eclipseplugin.utils.ClasspathVariableSetter;
 import org.osgi.framework.BundleContext;
 

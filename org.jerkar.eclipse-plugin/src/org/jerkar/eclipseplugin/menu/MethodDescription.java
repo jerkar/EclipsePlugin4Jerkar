@@ -1,11 +1,13 @@
 package org.jerkar.eclipseplugin.menu;
 
+import java.util.Iterator;
+
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
-public class MethodDescription {
+class MethodDescription {
 
     private final String name;
 
@@ -37,9 +39,54 @@ public class MethodDescription {
                 return null;
             }
             Object[] value = (Object[]) pairs[0].getValue(); 
-            return (String) value[0];
+            return singleString(value);
         }
         return null;
+    }
+    
+    public boolean hasDefinition() {
+        return definition != null && !definition.trim().equals("");
+    }
+    
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MethodDescription other = (MethodDescription) obj;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        return true;
+    }
+    
+    @Override
+    public String toString() {
+        return name;
+    }
+    
+    private static String singleString(Object[] lines) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i< lines.length; i++) {
+            result.append(lines[i].toString());
+            if ( i+1 < lines.length) {
+                result.append("\n");
+            }
+        }
+        return result.toString();
     }
 
 }

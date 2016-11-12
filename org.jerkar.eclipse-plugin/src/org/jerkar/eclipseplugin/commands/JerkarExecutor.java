@@ -1,9 +1,12 @@
 package org.jerkar.eclipseplugin.commands;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -21,38 +24,107 @@ import org.jerkar.eclipseplugin.utils.ConsoleHelper;
 import org.jerkar.eclipseplugin.utils.ConsoleHelper.StreamGobbler;
 import org.jerkar.eclipseplugin.utils.JerkarHelper;
 
-class JerkarExecutor {
+public class JerkarExecutor {
 
-    static Object run(ExecutionEvent event, String... commands) throws ExecutionException {
+    public static Object run(ExecutionEvent event, String... commands) throws ExecutionException {
         ISelection selection = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getSelection();
         if (selection != null & selection instanceof IStructuredSelection) {
             IStructuredSelection strucSelection = (IStructuredSelection) selection;
             Object projectSelection = strucSelection.getFirstElement();
             if (projectSelection instanceof IJavaProject) {
                 IJavaProject javaProject = (IJavaProject) projectSelection;
-                JerkarJob jerkarJob = new JerkarJob(javaProject, commands);
+                JerkarJob jerkarJob = new JerkarJob(javaProject.getProject(), commands);
                 jerkarJob.schedule();
             }
         }
         return null;
     }
     
+    public static Object runCmdLine(IProject project, String commandLine) {
+        String finalCmd = "jerkar " + commandLine;
+        String[] items = translateCommandline(finalCmd);
+        JerkarJob jerkarJob = new JerkarJob(project, items);
+        jerkarJob.schedule();
+        return  null;
+    }
+    
+    // Borrowed from ANT project
+    private static String[] translateCommandline(String toProcess) {
+        if (toProcess == null || toProcess.length() == 0) {
+            // no command? no string
+            return new String[0];
+        }
+        // parse with a simple finite state machine
+
+        final int normal = 0;
+        final int inQuote = 1;
+        final int inDoubleQuote = 2;
+        int state = normal;
+        final StringTokenizer tok = new StringTokenizer(toProcess, "\"\' ", true);
+        final ArrayList<String> result = new ArrayList<String>();
+        final StringBuilder current = new StringBuilder();
+        boolean lastTokenHasBeenQuoted = false;
+
+        while (tok.hasMoreTokens()) {
+            final String nextTok = tok.nextToken();
+            switch (state) {
+            case inQuote:
+                if ("\'".equals(nextTok)) {
+                    lastTokenHasBeenQuoted = true;
+                    state = normal;
+                } else {
+                    current.append(nextTok);
+                }
+                break;
+            case inDoubleQuote:
+                if ("\"".equals(nextTok)) {
+                    lastTokenHasBeenQuoted = true;
+                    state = normal;
+                } else {
+                    current.append(nextTok);
+                }
+                break;
+            default:
+                if ("\'".equals(nextTok)) {
+                    state = inQuote;
+                } else if ("\"".equals(nextTok)) {
+                    state = inDoubleQuote;
+                } else if (" ".equals(nextTok)) {
+                    if (lastTokenHasBeenQuoted || current.length() != 0) {
+                        result.add(current.toString());
+                        current.setLength(0);
+                    }
+                } else {
+                    current.append(nextTok);
+                }
+                lastTokenHasBeenQuoted = false;
+                break;
+            }
+        }
+        if (lastTokenHasBeenQuoted || current.length() != 0) {
+            result.add(current.toString());
+        }
+        if (state == inQuote || state == inDoubleQuote) {
+            throw new IllegalArgumentException("unbalanced quotes in " + toProcess);
+        }
+        return result.toArray(new String[result.size()]);
+    }
+    
     private static class JerkarJob extends Job {
         
-        private final IJavaProject javaProject;
+        private final IProject project;
         
         private final String[] commands;
 
-        public JerkarJob(IJavaProject javaProject, String[] commands) {
+        public JerkarJob(IProject project, String[] commands) {
             super("Jerkar");
-            this.javaProject = javaProject;
+            this.project = project;
             this.commands = commands;
         }
 
         @Override
         protected IStatus run(IProgressMonitor arg0) {
-            IResource resource = javaProject.getResource();
-            IPath path = resource.getLocation();
+            IPath path = project.getLocation();
             File file = path.toFile();
             ProcessBuilder builder = JerkarHelper.processBuilder(commands);
             builder.directory(file);
@@ -70,7 +142,7 @@ class JerkarExecutor {
                 outputStreamGobbler.stop();
                 errorStreamGobbler.stop();
                 consoleOutputStream.close();
-                javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
+                project.refreshLocal(IResource.DEPTH_INFINITE, null);
                 return Status.OK_STATUS;
             } catch (Exception e) {
                 return new Status(Status.ERROR, Activator.PLUGIN_ID, "Error while running Jerkar",  e);

@@ -1,8 +1,5 @@
 package org.jerkar.eclipseplugin.menu;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -28,10 +25,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.PlatformUI;
+import org.jerkar.eclipseplugin.commands.JerkarExecutor;
 
 public class LaunchMenu extends ContributionItem {
 
@@ -61,23 +60,61 @@ public class LaunchMenu extends ContributionItem {
 
     }
 
-    private static void fill(Menu menu, int index, IJavaProject javaProject) throws JavaModelException {
+    private static void fill(final Menu menu, int index, IJavaProject javaProject) throws JavaModelException {
         ITypeHierarchy typeHierarchy = getBuildClassType(javaProject);
         int i = index;
-        List<IMethod> methods = getPublicNoArgMethods(typeHierarchy);
-        Collections.sort(methods, new MethodComparator());
-        for (IMethod method : methods) {
-            MethodDescription methodDescription = new MethodDescription(method);
+        int count =populateLastCommands(menu, index, javaProject.getProject());
+        i += count;
+        if (count > 0) {
+            new MenuItem(menu, SWT.SEPARATOR, i);
+            i ++;
+        }
+        MethodDescriptions methods = getPublicNoArgMethods(typeHierarchy);
+        methods.sort();
+        MenuItem title = new MenuItem(menu, SWT.CASCADE, i);
+        title.setText(typeHierarchy.getType().getFullyQualifiedName());
+        title.setToolTipText("Build class");
+        title.setEnabled(false);
+        i ++;
+        new MenuItem(menu, SWT.SEPARATOR, i);
+        i ++;
+        final LocalRunHandler executor = new LocalRunHandler(javaProject.getProject());
+        for (final MethodDescription methodDescription : methods) {
             MenuItem menuItem = new MenuItem(menu, SWT.CHECK, i);
             menuItem.setText(methodDescription.getName());
+            final CommandInfo commandInfo = new CommandInfo();
+            commandInfo.methodDescription = methodDescription;
             menuItem.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    System.err.println("Dynamic menu selected");
+                    new MethodShell(PlatformUI.getWorkbench().getDisplay()).open(commandInfo, executor);
                 }
             });
             menuItem.setToolTipText(methodDescription.getDefinition());
             index++;
         }
+    }
+    
+    private static int populateLastCommands(Menu menu, int index, final IProject project) {
+        List<MethodDescription> commands = LastCommands.INSTANCE.commands(project);
+        for (final MethodDescription methodDescription : commands) {
+            MenuItem menuItem = new MenuItem(menu, SWT.PUSH, index);
+            menuItem.setText(methodDescription.getName());
+            menuItem.setToolTipText(methodDescription.getDefinition());
+            final CommandInfo commandInfo = new CommandInfo();
+            commandInfo.methodDescription = methodDescription;
+            menuItem.addSelectionListener(new SelectionAdapter() {
+                
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    JerkarExecutor.runCmdLine(project, methodDescription.getName());
+                }
+                
+
+
+            });
+            index++;
+        }
+        return index;
     }
 
     private static IProject project() {
@@ -110,16 +147,20 @@ public class LaunchMenu extends ContributionItem {
                     for (ICompilationUnit compilationUnit : packageFragment.getCompilationUnits()) {
                         IType type = compilationUnit.getTypes()[0];
                         String name = type.getFullyQualifiedName();
+                        
+                        // TODO fined the corresponding binary type in order to read the JkDoc annotation.
+                        IType bynaryType = type;
 
                         // We want to get the first compiled class in this
                         // fragment
                         boolean lesser = selectedType == null
                                 || name.compareTo(selectedType.getFullyQualifiedName()) < 0;
                         if (lesser) {
-                            ITypeHierarchy typeHierarchy = type.newSupertypeHierarchy(null);
-                            for (IType type2 : typeHierarchy.getAllSuperclasses(type)) {
+                            
+                            ITypeHierarchy typeHierarchy = bynaryType.newSupertypeHierarchy(null);
+                            for (IType type2 : typeHierarchy.getAllSuperclasses(bynaryType)) {
                                 if (type2.equals(jkBuildType)) {
-                                    selectedType = type;
+                                    selectedType = bynaryType;
                                     selectedHierarchy = typeHierarchy;
                                     break;
                                 }
@@ -134,8 +175,8 @@ public class LaunchMenu extends ContributionItem {
         return null;
     }
 
-    private static List<IMethod> getPublicNoArgMethods(ITypeHierarchy typeHierarchy) throws JavaModelException {
-        List<IMethod> result = new LinkedList<>();
+    private static MethodDescriptions getPublicNoArgMethods(ITypeHierarchy typeHierarchy) throws JavaModelException {
+        MethodDescriptions result = new MethodDescriptions();
         result.addAll(getPublicNoArgMethods(typeHierarchy.getType()));
         for (IType type : typeHierarchy.getAllSuperclasses(typeHierarchy.getType())) {
             if (!type.getFullyQualifiedName().equals(Object.class.getName())) {
@@ -146,8 +187,8 @@ public class LaunchMenu extends ContributionItem {
 
     }
 
-    private static List<IMethod> getPublicNoArgMethods(IType type) throws JavaModelException {
-        List<IMethod> result = new LinkedList<>();
+    private static MethodDescriptions getPublicNoArgMethods(IType type) throws JavaModelException {
+        MethodDescriptions result = new MethodDescriptions();
         for (IMethod method : type.getMethods()) {
             if (!Flags.isAbstract(method.getFlags()) 
                     && method.getNumberOfParameters() == 0
@@ -155,7 +196,7 @@ public class LaunchMenu extends ContributionItem {
                     && method.getReturnType().endsWith(Signature.SIG_VOID)
                     && !method.isConstructor()
                     && !method.getElementName().equals("init")) {
-                result.add(method);
+                result.add(new MethodDescription(method));
             }
         }
         return result;
@@ -169,13 +210,23 @@ public class LaunchMenu extends ContributionItem {
         }
     }
     
-    private static class MethodComparator implements Comparator<IMethod> {
+    private static class LocalRunHandler implements RunHandler {
+        
+        private final IProject iProject;
+
+        public LocalRunHandler(IProject iProject) {
+            super();
+            this.iProject = iProject;
+        }
 
         @Override
-        public int compare(IMethod o1, IMethod o2) {
-            return - o1.getElementName().compareTo(o2.getElementName());
+        public void process(String commandLine, String definition) {
+           LastCommands.INSTANCE.put(iProject, new MethodDescription(commandLine, definition));
+           JerkarExecutor.runCmdLine(iProject, commandLine);
         }
-        
+       
     }
+    
+   
 
 }
