@@ -2,7 +2,7 @@
 <feature
       id="org.jerkar.eclipse_feature"
       label="Jerkar IDE"
-      version="0.1.3"
+      version="0.2.0"
       provider-name="org.jerkar">
 
    <description>
@@ -31,7 +31,7 @@ Copyright individual contributors as indicated by the @authors tag, 2014.
          id="org.jerkar.eclipse-plugin"
          download-size="0"
          install-size="0"
-         version="0.1.3"
+         version="0.2.0"
          unpack="false"/>
 
 </feature>
