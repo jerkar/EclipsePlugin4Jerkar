@@ -12,6 +12,9 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.jerkar.eclipseplugin.commands.JerkarExecutor;
 import org.jerkar.eclipseplugin.model.LastCommands;
 import org.jerkar.eclipseplugin.model.MethodDescription;
+import org.jerkar.eclipseplugin.model.MethodInfo;
+import org.jerkar.eclipseplugin.window.EditDialog;
+import org.jerkar.eclipseplugin.window.RunDialog;
 import org.jerkar.eclipseplugin.window.ScaffoldDialog;
 
 public class MainMenu extends ContributionItem {
@@ -30,31 +33,35 @@ public class MainMenu extends ContributionItem {
         if (newIndex > index) {
             new MenuItem(menu, SWT.SEPARATOR);
         }
-        launch(menu, newIndex+1, project);
-        updateClasspath(menu, newIndex+2, project);
-        scaffold(menu, newIndex+3, project);
+        launch(menu, newIndex + 1, project);
+        updateClasspath(menu, newIndex + 2, project);
+        scaffold(menu, newIndex + 3, project);
     }
 
-    private static int lastCommands(Menu menu, int index, final IProject project) {
+    private static int lastCommands(final Menu menu, int index, final IProject project) {
         final List<MethodDescription> commands = LastCommands.INSTANCE.commands(project);
         for (final MethodDescription methodDescription : commands) {
             MenuItem menuItem = new MenuItem(menu, SWT.PUSH, index);
             menuItem.setText(methodDescription.getName());
             menuItem.setToolTipText(methodDescription.getDefinition());
             menuItem.addSelectionListener(new SelectionAdapter() {
-                
+
                 @Override
                 public void widgetSelected(SelectionEvent e) {
-                    LastCommands.INSTANCE.put(project, methodDescription);
-                    JerkarExecutor.runCmdLine(project, methodDescription.getName());
+                    if (e.stateMask == SWT.CTRL || e.stateMask == SWT.SHIFT) {
+                        new EditDialog(menu.getShell(), new MethodInfo(methodDescription, project)).open();
+                    } else {
+                        LastCommands.INSTANCE.put(project, methodDescription);
+                        JerkarExecutor.runCmdLine(project, methodDescription.getName());
+                    }
                 }
-               
+
             });
             index++;
         }
         return index;
     }
-    
+
     private static void launch(Menu menu, int index, IProject project) {
         MenuItem menuItem = new MenuItem(menu, SWT.CASCADE);
         menuItem.setText("Launch");
@@ -62,35 +69,31 @@ public class MainMenu extends ContributionItem {
         menuItem.setMenu(submenu);
         LaunchMenu.fill(submenu, 0, project);
     }
-    
+
     private static void updateClasspath(Menu menu, int index, final IProject project) {
         MenuItem menuItem = new MenuItem(menu, SWT.PUSH);
         menuItem.setText("Update Classpath");
         menuItem.addSelectionListener(new SelectionAdapter() {
-            
+
             @Override
             public void widgetSelected(SelectionEvent e) {
                 JerkarExecutor.runCmdLine(project, "eclipse#generateFiles");
             }
-            
+
         });
     }
-    
+
     private static void scaffold(final Menu menu, int index, final IProject project) {
         MenuItem menuItem = new MenuItem(menu, SWT.PUSH);
         menuItem.setText("Scaffold");
         menuItem.addSelectionListener(new SelectionAdapter() {
-            
+
             @Override
             public void widgetSelected(SelectionEvent e) {
                 new ScaffoldDialog(menu.getShell(), project).open();
             }
-            
+
         });
     }
-    
-    
-
-   
 
 }

@@ -19,11 +19,11 @@ import org.jerkar.eclipseplugin.model.MethodInfo;
 
 public class RunDialog extends TitleAreaDialog {
 
-    private Text cmdtext;
+    protected Text cmdtext;
 
-    private Text definitionText;
+    protected Text definitionText;
 
-    private final MethodInfo methodInfo;
+    protected final MethodInfo methodInfo;
 
     public RunDialog(Shell parentShell, MethodInfo methodInfo) {
         super(parentShell);

@@ -36,6 +36,14 @@ public class LastCommands {
         }
         return Collections.unmodifiableList(result);
     }
+    
+    public void remove(IProject project, String name) {
+        List<MethodDescription> commands = allCommands.get(project);
+        if (commands == null) {
+            return;
+        }
+        commands.remove(new MethodDescription(name, ""));
+    }
 
     public void put(IProject project, MethodDescription methodDescription) {
         List<MethodDescription> commands = allCommands.get(project);
