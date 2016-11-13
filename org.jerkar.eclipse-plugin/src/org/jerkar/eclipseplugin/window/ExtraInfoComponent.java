@@ -1,4 +1,4 @@
-package org.jerkar.eclipseplugin.menu;
+package org.jerkar.eclipseplugin.window;
 
 
 
@@ -18,13 +18,13 @@ class ExtraInfoComponent {
         return this.text.getText();
     }
 
-    public ExtraInfoComponent(Composite parent, CommandInfo commandInfo) {
+    public ExtraInfoComponent(Composite parent, String definition) {
         this.composite = new Composite(parent, SWT.NONE);
         this.composite.setLayout(new FillLayout());
-        methodSescription(this.composite, commandInfo.methodDescription.getDefinition());
+        methodDescription(this.composite, definition);
     }
     
-    private Group methodSescription(Composite parent, String description) {
+    private Group methodDescription(Composite parent, String description) {
         Group group = new Group(parent, SWT.NONE);
         FillLayout layout = new FillLayout();
         layout.marginHeight = 5;

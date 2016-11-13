@@ -1,4 +1,4 @@
-package org.jerkar.eclipseplugin.menu;
+package org.jerkar.eclipseplugin.model;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -6,11 +6,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-class MethodDescriptions implements Iterable<MethodDescription> {
+public class MethodDescriptions implements Iterable<MethodDescription> {
     
     private List<MethodDescription> list = new LinkedList<>();
     
-    void add(MethodDescription description) {
+    public void add(MethodDescription description) {
         int indexOfExisting = list.indexOf(description); 
         if (indexOfExisting >= 0) {
             MethodDescription existing = list.get(indexOfExisting);
@@ -29,7 +29,7 @@ class MethodDescriptions implements Iterable<MethodDescription> {
         }
     }
     
-    void sort() {
+    public void sort() {
         Collections.sort(list, new MethodComparator());
     }
 

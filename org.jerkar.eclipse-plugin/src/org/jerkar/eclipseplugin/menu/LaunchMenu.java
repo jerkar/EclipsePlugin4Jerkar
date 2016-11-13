@@ -1,11 +1,7 @@
 package org.jerkar.eclipseplugin.menu;
 
-import java.util.List;
-
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.Flags;
@@ -21,16 +17,15 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jface.action.ContributionItem;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.ui.ISelectionService;
-import org.eclipse.ui.PlatformUI;
-import org.jerkar.eclipseplugin.commands.JerkarExecutor;
+import org.jerkar.eclipseplugin.model.MethodDescription;
+import org.jerkar.eclipseplugin.model.MethodDescriptions;
+import org.jerkar.eclipseplugin.model.MethodInfo;
+import org.jerkar.eclipseplugin.window.RunDialog;
 
 public class LaunchMenu extends ContributionItem {
 
@@ -48,7 +43,11 @@ public class LaunchMenu extends ContributionItem {
         // Here you could get selection and decide what to do
         // You can also simply return if you do not want to show a menu
 
-        IProject project = project();
+        IProject project = Utils.currentProject();
+        fill(menu, index, project);
+    }
+    
+    static void fill(final Menu menu, int index, IProject project) {
         if (isJavaProject(project)) {
             IJavaProject javaProject = JavaCore.create(project);
             try {
@@ -57,18 +56,12 @@ public class LaunchMenu extends ContributionItem {
                 throw new RuntimeException(e);
             }
         }
-
     }
 
     private static void fill(final Menu menu, int index, IJavaProject javaProject) throws JavaModelException {
         ITypeHierarchy typeHierarchy = getBuildClassType(javaProject);
         int i = index;
-        int count =populateLastCommands(menu, index, javaProject.getProject());
-        i += count;
-        if (count > 0) {
-            new MenuItem(menu, SWT.SEPARATOR, i);
-            i ++;
-        }
+        IProject project = javaProject.getProject();
         MethodDescriptions methods = getPublicNoArgMethods(typeHierarchy);
         methods.sort();
         MenuItem title = new MenuItem(menu, SWT.CASCADE, i);
@@ -78,15 +71,13 @@ public class LaunchMenu extends ContributionItem {
         i ++;
         new MenuItem(menu, SWT.SEPARATOR, i);
         i ++;
-        final LocalRunHandler executor = new LocalRunHandler(javaProject.getProject());
         for (final MethodDescription methodDescription : methods) {
             MenuItem menuItem = new MenuItem(menu, SWT.CHECK, i);
             menuItem.setText(methodDescription.getName());
-            final CommandInfo commandInfo = new CommandInfo();
-            commandInfo.methodDescription = methodDescription;
+            final MethodInfo methodInfo = new MethodInfo(methodDescription, project);
             menuItem.addSelectionListener(new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    new MethodShell(PlatformUI.getWorkbench().getDisplay()).open(commandInfo, executor);
+                    new RunDialog(menu.getShell(), methodInfo).open();
                 }
             });
             menuItem.setToolTipText(methodDescription.getDefinition());
@@ -94,46 +85,6 @@ public class LaunchMenu extends ContributionItem {
         }
     }
     
-    private static int populateLastCommands(Menu menu, int index, final IProject project) {
-        List<MethodDescription> commands = LastCommands.INSTANCE.commands(project);
-        for (final MethodDescription methodDescription : commands) {
-            MenuItem menuItem = new MenuItem(menu, SWT.PUSH, index);
-            menuItem.setText(methodDescription.getName());
-            menuItem.setToolTipText(methodDescription.getDefinition());
-            final CommandInfo commandInfo = new CommandInfo();
-            commandInfo.methodDescription = methodDescription;
-            menuItem.addSelectionListener(new SelectionAdapter() {
-                
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    JerkarExecutor.runCmdLine(project, methodDescription.getName());
-                }
-                
-
-
-            });
-            index++;
-        }
-        return index;
-    }
-
-    private static IProject project() {
-        ISelectionService iSelectionService = PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-                .getSelectionService();
-        IStructuredSelection selection = (IStructuredSelection) iSelectionService.getSelection();
-        IAdaptable adaptable = (IAdaptable) selection.getFirstElement();
-        System.out.println("adaptable class " + adaptable.getClass());
-        System.out.println("adaptable " + adaptable);
-        if (adaptable instanceof IResource) {
-            return ((IResource) adaptable).getProject();
-        }
-        IProject iProject = adaptable.getAdapter(IProject.class);
-        if (iProject == null) {
-            IJavaElement iResource = adaptable.getAdapter(IJavaElement.class);
-            iProject = iResource.getResource().getProject();
-        }
-        return iProject;
-    }
 
     private static ITypeHierarchy getBuildClassType(IJavaProject javaProject) throws JavaModelException {
         IType jkBuildType = javaProject.findType("org.jerkar.tool.JkBuild");
@@ -202,7 +153,7 @@ public class LaunchMenu extends ContributionItem {
         return result;
     }
 
-    private boolean isJavaProject(IProject project) {
+    private static boolean isJavaProject(IProject project) {
         try {
             return project.hasNature("org.eclipse.jdt.core.javanature");
         } catch (CoreException e) {
@@ -210,23 +161,6 @@ public class LaunchMenu extends ContributionItem {
         }
     }
     
-    private static class LocalRunHandler implements RunHandler {
-        
-        private final IProject iProject;
-
-        public LocalRunHandler(IProject iProject) {
-            super();
-            this.iProject = iProject;
-        }
-
-        @Override
-        public void process(String commandLine, String definition) {
-           LastCommands.INSTANCE.put(iProject, new MethodDescription(commandLine, definition));
-           JerkarExecutor.runCmdLine(iProject, commandLine);
-        }
-       
-    }
     
-   
 
 }

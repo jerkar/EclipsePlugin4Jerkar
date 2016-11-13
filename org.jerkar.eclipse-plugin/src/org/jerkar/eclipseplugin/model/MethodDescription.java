@@ -1,13 +1,11 @@
-package org.jerkar.eclipseplugin.menu;
-
-import java.util.Iterator;
+package org.jerkar.eclipseplugin.model;
 
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
-class MethodDescription {
+public class MethodDescription {
 
     private final String name;
 
@@ -36,12 +34,12 @@ class MethodDescription {
         if (annotation.exists()) {
             IMemberValuePair[] pairs = annotation.getMemberValuePairs();
             if (pairs.length == 0) {
-                return null;
+                return "";
             }
             Object[] value = (Object[]) pairs[0].getValue(); 
             return singleString(value);
         }
-        return null;
+        return "";
     }
     
     public boolean hasDefinition() {

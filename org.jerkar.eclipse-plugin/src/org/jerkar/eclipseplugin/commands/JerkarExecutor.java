@@ -41,8 +41,7 @@ public class JerkarExecutor {
     }
     
     public static Object runCmdLine(IProject project, String commandLine) {
-        String finalCmd = "jerkar " + commandLine;
-        String[] items = translateCommandline(finalCmd);
+        String[] items = translateCommandline(commandLine);
         JerkarJob jerkarJob = new JerkarJob(project, items);
         jerkarJob.schedule();
         return  null;
