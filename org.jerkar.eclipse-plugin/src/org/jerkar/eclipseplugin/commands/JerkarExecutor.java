@@ -12,7 +12,10 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -33,16 +36,16 @@ public class JerkarExecutor {
             Object projectSelection = strucSelection.getFirstElement();
             if (projectSelection instanceof IJavaProject) {
                 IJavaProject javaProject = (IJavaProject) projectSelection;
-                JerkarJob jerkarJob = new JerkarJob(javaProject.getProject(), commands);
+                JerkarJob jerkarJob = new JerkarJob(javaProject.getProject(), commands, null);
                 jerkarJob.schedule();
             }
         }
         return null;
     }
     
-    public static Object runCmdLine(IProject project, String commandLine) {
+    public static Object runCmdLine(IProject project, String commandLine, Runnable after) {
         String[] items = translateCommandline(commandLine);
-        JerkarJob jerkarJob = new JerkarJob(project, items);
+        JerkarJob jerkarJob = new JerkarJob(project, items, after);
         jerkarJob.schedule();
         return  null;
     }
@@ -115,10 +118,23 @@ public class JerkarExecutor {
         
         private final String[] commands;
 
-        public JerkarJob(IProject project, String[] commands) {
+        public JerkarJob(IProject project, String[] commands, final Runnable after) {
             super("Jerkar");
             this.project = project;
             this.commands = commands;
+            if (after != null) {
+                this.addJobChangeListener(new JobChangeAdapter() {
+                    
+                    @Override
+                    public void done(IJobChangeEvent event) {
+                        if (event.getResult().equals(Status.OK_STATUS)) {
+                            after.run();
+                        }
+                        
+                    }
+      
+                });
+            }
         }
 
         @Override

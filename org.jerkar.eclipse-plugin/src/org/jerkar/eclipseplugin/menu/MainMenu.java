@@ -14,7 +14,6 @@ import org.jerkar.eclipseplugin.model.LastCommands;
 import org.jerkar.eclipseplugin.model.MethodDescription;
 import org.jerkar.eclipseplugin.model.MethodInfo;
 import org.jerkar.eclipseplugin.window.EditDialog;
-import org.jerkar.eclipseplugin.window.RunDialog;
 import org.jerkar.eclipseplugin.window.ScaffoldDialog;
 
 public class MainMenu extends ContributionItem {
@@ -52,7 +51,7 @@ public class MainMenu extends ContributionItem {
                         new EditDialog(menu.getShell(), new MethodInfo(methodDescription, project)).open();
                     } else {
                         LastCommands.INSTANCE.put(project, methodDescription);
-                        JerkarExecutor.runCmdLine(project, methodDescription.getName());
+                        JerkarExecutor.runCmdLine(project, methodDescription.getName(), null);
                     }
                 }
 
@@ -77,7 +76,7 @@ public class MainMenu extends ContributionItem {
 
             @Override
             public void widgetSelected(SelectionEvent e) {
-                JerkarExecutor.runCmdLine(project, "eclipse#generateFiles");
+                JerkarExecutor.runCmdLine(project, "eclipse#generateFiles", null);
             }
 
         });

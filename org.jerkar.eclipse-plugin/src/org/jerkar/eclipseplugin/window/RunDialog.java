@@ -90,7 +90,7 @@ public class RunDialog extends TitleAreaDialog {
     protected void okPressed() {
         LastCommands.INSTANCE.put(methodInfo.iProject,
                 new MethodDescription(this.cmdtext.getText(), this.definitionText.getText()));
-        JerkarExecutor.runCmdLine(methodInfo.iProject, cmdtext.getText());
+        JerkarExecutor.runCmdLine(methodInfo.iProject, cmdtext.getText(), null);
         super.okPressed();
     }
 

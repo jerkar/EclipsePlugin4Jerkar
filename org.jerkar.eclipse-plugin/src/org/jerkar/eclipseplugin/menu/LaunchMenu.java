@@ -5,8 +5,11 @@ import java.io.IOException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -25,6 +28,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.jerkar.eclipseplugin.Activator;
 import org.jerkar.eclipseplugin.model.MethodDescription;
 import org.jerkar.eclipseplugin.model.MethodDescriptions;
 import org.jerkar.eclipseplugin.model.MethodInfo;
@@ -36,7 +40,7 @@ import org.w3c.dom.Document;
 public class LaunchMenu extends ContributionItem {
 
     private static final IPath DEF_PATH = Path.forPosix("build/def");
-    
+
     private static MethodDescriptions defaultMethods;
 
     public LaunchMenu() {
@@ -54,7 +58,7 @@ public class LaunchMenu extends ContributionItem {
         IProject project = Utils.currentProject();
         fill(menu, index, project);
     }
-    
+
     static void fill(final Menu menu, int index, IProject project) {
         if (isJavaProject(project)) {
             IJavaProject javaProject = JavaCore.create(project);
@@ -68,24 +72,24 @@ public class LaunchMenu extends ContributionItem {
 
     private static void fill(final Menu menu, int index, IJavaProject javaProject) throws JavaModelException {
         ITypeHierarchy typeHierarchy = getBuildClassType(javaProject);
-        
+
         int i = index;
         IProject project = javaProject.getProject();
         final MethodDescriptions methods;
         MenuItem title = new MenuItem(menu, SWT.CASCADE, i);
         if (typeHierarchy != null) {
-        	methods = getPublicNoArgMethods(typeHierarchy);
-        	title.setText(typeHierarchy.getType().getFullyQualifiedName());
+            methods = getPublicNoArgMethods(typeHierarchy);
+            title.setText(typeHierarchy.getType().getFullyQualifiedName());
         } else {
-        	methods = getMethods();
-        	title.setText("JkJavaBuild");
+            methods = getMethods();
+            title.setText("JkJavaBuild");
         }
         methods.sort();
         title.setToolTipText("Build class");
         title.setEnabled(false);
-        i ++;
+        i++;
         new MenuItem(menu, SWT.SEPARATOR, i);
-        i ++;
+        i++;
         for (final MethodDescription methodDescription : methods) {
             MenuItem menuItem = new MenuItem(menu, SWT.CHECK, i);
             menuItem.setText(methodDescription.getName());
@@ -99,7 +103,6 @@ public class LaunchMenu extends ContributionItem {
             index++;
         }
     }
-    
 
     private static ITypeHierarchy getBuildClassType(IJavaProject javaProject) throws JavaModelException {
         IType jkBuildType = javaProject.findType("org.jerkar.tool.JkBuild");
@@ -113,8 +116,9 @@ public class LaunchMenu extends ContributionItem {
                     for (ICompilationUnit compilationUnit : packageFragment.getCompilationUnits()) {
                         IType type = compilationUnit.getTypes()[0];
                         String name = type.getFullyQualifiedName();
-                        
-                        // TODO fined the corresponding binary type in order to read the JkDoc annotation.
+
+                        // TODO fined the corresponding binary type in order to
+                        // read the JkDoc annotation.
                         IType bynaryType = type;
 
                         // We want to get the first compiled class in this
@@ -122,7 +126,7 @@ public class LaunchMenu extends ContributionItem {
                         boolean lesser = selectedType == null
                                 || name.compareTo(selectedType.getFullyQualifiedName()) < 0;
                         if (lesser) {
-                            
+
                             ITypeHierarchy typeHierarchy = bynaryType.newSupertypeHierarchy(null);
                             for (IType type2 : typeHierarchy.getAllSuperclasses(bynaryType)) {
                                 if (type2.equals(jkBuildType)) {
@@ -156,12 +160,9 @@ public class LaunchMenu extends ContributionItem {
     private static MethodDescriptions getPublicNoArgMethods(IType type) throws JavaModelException {
         MethodDescriptions result = new MethodDescriptions();
         for (IMethod method : type.getMethods()) {
-            if (!Flags.isAbstract(method.getFlags()) 
-                    && method.getNumberOfParameters() == 0
-                    && Flags.isPublic(method.getFlags()) 
-                    && method.getReturnType().endsWith(Signature.SIG_VOID)
-                    && !method.isConstructor()
-                    && !method.getElementName().equals("init")) {
+            if (!Flags.isAbstract(method.getFlags()) && method.getNumberOfParameters() == 0
+                    && Flags.isPublic(method.getFlags()) && method.getReturnType().endsWith(Signature.SIG_VOID)
+                    && !method.isConstructor() && !method.getElementName().equals("init")) {
                 result.add(new MethodDescription(method));
             }
         }
@@ -175,31 +176,29 @@ public class LaunchMenu extends ContributionItem {
             throw new RuntimeException(e);
         }
     }
-    
+
     private static MethodDescriptions getMethods() {
-    	if (defaultMethods != null) {
-    		return defaultMethods;
-    	}
-    	File file;
-		try {
-			file = File.createTempFile("jerkarpluginmethod", "xml");
-			Process process = JerkarHelper.processBuilder("help", "-help.xmlFile=\"" + file.getAbsolutePath() + "\"" ).start();
-			process.waitFor();
-			Document document = UtilsXml.documentFrom(file);
-	    	MethodDescriptions result = MethodDescriptions.fromXml(document);
-	    	defaultMethods = result;
-	    	file.delete();
-	    	return result;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		} 
-    	
+        if (defaultMethods != null) {
+            return defaultMethods;
+        }
+        File file = null;
+        try {
+            file = File.createTempFile("jerkarpluginmethod", "xml");
+            Process process = JerkarHelper.processBuilder("help", "-help.xmlFile=\"" + file.getAbsolutePath() + "\"").inheritIO()
+                    .start();
+            process.waitFor();
+            Document document = UtilsXml.documentFrom(file);
+            MethodDescriptions result = MethodDescriptions.fromXml(document);
+            defaultMethods = result;
+            file.delete();
+            return result;
+        } catch (Exception e) {
+            ILog log = Activator.getDefault().getLog();
+            log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Error while parsing " + file.getAbsolutePath(), e));
+            defaultMethods = new MethodDescriptions();
+            return defaultMethods;
+        }
+
     }
-    
-    
-   
-    
-    
-    
 
 }
