@@ -6,8 +6,10 @@ The plugin can be installed using site update : <i>http://project.jerkar.org/ecl
 
 For now, this plugin provides a "Jerkar" menu extension when right clicking on a project. The extension provides :
 
+* Launch : open sub-menu for executing any build method on selected project.
 * Update classpath : this will align Eclipse .classpath with the dependencies declared in Jerkar build class.
 * Scaffold projects : this will create folder structure along a basic build class for starting up projects. 
+
 
 <br/>
 <br/>
