@@ -4,12 +4,10 @@
    <extension point="org.eclipse.ui.menus">
       <menuContribution allPopups="true" locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
          <menu icon="media/jk.png" label="Jerkar">
-            
-               <dynamic
-               		class="org.jerkar.eclipseplugin.menu.MainMenu"
-                    id="org.jerkar.eclipseplugin.menu.MainMenu">
-               </dynamic>
-             
+            <dynamic
+               class="org.jerkar.eclipseplugin.menu.MainMenu"
+               id="org.jerkar.eclipseplugin.menu.MainMenu">
+            </dynamic>
          </menu>
       </menuContribution>
    </extension>

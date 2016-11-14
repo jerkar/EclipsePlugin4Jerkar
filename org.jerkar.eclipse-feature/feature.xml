@@ -6,17 +6,22 @@
       provider-name="org.jerkar">
 
    <description>
-      Add contextual menu to project view, in order to launch Jerkar commands from here.
+      Add contextual menu to project view to execute Jerkar.
    </description>
 
    <copyright>
       jerkar.org Open Source
-Copyright individual contributors as indicated by the @authors tag, 2014.
+Copyright individual contributors as indicated by the @authors
+tag, 2014.
    </copyright>
 
    <license url="http://www.apache.org/licenses/LICENSE-2.0">
       Apache 2 License.
    </license>
+
+   <url>
+      <discovery label="GitHub page" url="https://github.com/jerkar/eclipsePlugin4Jerkar"/>
+   </url>
 
    <requires>
       <import plugin="org.eclipse.ui"/>
