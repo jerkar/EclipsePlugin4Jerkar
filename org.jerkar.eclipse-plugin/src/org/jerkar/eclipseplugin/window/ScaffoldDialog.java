@@ -94,7 +94,7 @@ public class ScaffoldDialog extends TitleAreaDialog {
             cmdBuilder.append("scaffold eclipse#");
         }
         if (this.embeddedMode.getSelection()) {
-            cmdBuilder.append(" -scaffold.embbeded");
+            cmdBuilder.append(" -scaffold.embedded");
         }
         JerkarExecutor.runCmdLine(project, cmdBuilder.toString());
         super.okPressed();
