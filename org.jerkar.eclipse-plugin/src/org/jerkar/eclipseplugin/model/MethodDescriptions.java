@@ -6,7 +6,22 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 public class MethodDescriptions implements Iterable<MethodDescription> {
+	
+	public static MethodDescriptions fromXml(Document document) {
+		Element buildEl = document.getDocumentElement();
+		Element methodsEl = UtilsXml.directChild(buildEl, "methods");
+		MethodDescriptions result = new MethodDescriptions();
+		for (Element methodEl : UtilsXml.directChildren(methodsEl, "method")) {
+			String name = UtilsXml.directChildText(methodEl, "name");
+			String description = UtilsXml.directChildText(methodEl, "description");
+			result.add(new MethodDescription(name, description));
+		}
+		return result;
+	}
     
     private List<MethodDescription> list = new LinkedList<>();
     

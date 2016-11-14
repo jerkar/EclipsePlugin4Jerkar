@@ -1,5 +1,8 @@
 package org.jerkar.eclipseplugin.menu;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -25,11 +28,16 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.jerkar.eclipseplugin.model.MethodDescription;
 import org.jerkar.eclipseplugin.model.MethodDescriptions;
 import org.jerkar.eclipseplugin.model.MethodInfo;
+import org.jerkar.eclipseplugin.model.UtilsXml;
+import org.jerkar.eclipseplugin.utils.JerkarHelper;
 import org.jerkar.eclipseplugin.window.RunDialog;
+import org.w3c.dom.Document;
 
 public class LaunchMenu extends ContributionItem {
 
     private static final IPath DEF_PATH = Path.forPosix("build/def");
+    
+    private static MethodDescriptions defaultMethods;
 
     public LaunchMenu() {
     }
@@ -60,12 +68,19 @@ public class LaunchMenu extends ContributionItem {
 
     private static void fill(final Menu menu, int index, IJavaProject javaProject) throws JavaModelException {
         ITypeHierarchy typeHierarchy = getBuildClassType(javaProject);
+        
         int i = index;
         IProject project = javaProject.getProject();
-        MethodDescriptions methods = getPublicNoArgMethods(typeHierarchy);
-        methods.sort();
+        final MethodDescriptions methods;
         MenuItem title = new MenuItem(menu, SWT.CASCADE, i);
-        title.setText(typeHierarchy.getType().getFullyQualifiedName());
+        if (typeHierarchy != null) {
+        	methods = getPublicNoArgMethods(typeHierarchy);
+        	title.setText(typeHierarchy.getType().getFullyQualifiedName());
+        } else {
+        	methods = getMethods();
+        	title.setText("JkJavaBuild");
+        }
+        methods.sort();
         title.setToolTipText("Build class");
         title.setEnabled(false);
         i ++;
@@ -160,6 +175,30 @@ public class LaunchMenu extends ContributionItem {
             throw new RuntimeException(e);
         }
     }
+    
+    private static MethodDescriptions getMethods() {
+    	if (defaultMethods != null) {
+    		return defaultMethods;
+    	}
+    	File file;
+		try {
+			file = File.createTempFile("jerkarpluginmethod", "xml");
+			Process process = JerkarHelper.processBuilder("help", "-help.xmlFile=\"" + file.getAbsolutePath() + "\"" ).start();
+			process.waitFor();
+			Document document = UtilsXml.documentFrom(file);
+	    	MethodDescriptions result = MethodDescriptions.fromXml(document);
+	    	defaultMethods = result;
+	    	file.delete();
+	    	return result;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		} 
+    	
+    }
+    
+    
+   
+    
     
     
 
