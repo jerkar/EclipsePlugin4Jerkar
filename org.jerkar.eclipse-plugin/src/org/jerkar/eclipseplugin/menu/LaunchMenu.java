@@ -1,7 +1,6 @@
 package org.jerkar.eclipseplugin.menu;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -125,7 +124,7 @@ public class LaunchMenu extends ContributionItem {
                         // fragment
                         boolean lesser = selectedType == null
                                 || name.compareTo(selectedType.getFullyQualifiedName()) < 0;
-                        if (lesser) {
+                        if (lesser && !Flags.isAbstract(selectedType.getFlags())) {
 
                             ITypeHierarchy typeHierarchy = bynaryType.newSupertypeHierarchy(null);
                             for (IType type2 : typeHierarchy.getAllSuperclasses(bynaryType)) {

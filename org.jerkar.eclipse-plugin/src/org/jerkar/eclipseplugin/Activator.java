@@ -3,7 +3,6 @@ package org.jerkar.eclipseplugin;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.jerkar.eclipseplugin.utils.ClasspathVariableSetter;
-import org.jerkar.eclipseplugin.window.RunDialog;
 import org.osgi.framework.BundleContext;
 
 /**
