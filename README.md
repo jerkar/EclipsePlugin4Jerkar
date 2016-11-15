@@ -8,7 +8,9 @@ For now, this plugin provides a "Jerkar" menu extension when right clicking on a
 
 * Launch : open sub-menu for executing any build method on selected project.
 * Update classpath : this will align Eclipse .classpath with the dependencies declared in Jerkar build class.
-* Scaffold projects : this will create folder structure along a basic build class for starting up projects. 
+* Scaffold projects : this will create folder structure along a basic build class for starting up projects. It can be classic Java project or Spring Boot project.
+
+Now the last methods executed with the plugin are keep in favorite at the top of the entry menu. To edit or delete it, press `ctrl` + left click on it.
 
 
 <br/>
