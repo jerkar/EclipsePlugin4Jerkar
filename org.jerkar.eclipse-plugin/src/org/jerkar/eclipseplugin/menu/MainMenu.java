@@ -28,6 +28,9 @@ public class MainMenu extends ContributionItem {
     @Override
     public void fill(Menu menu, int index) {
         IProject project = Utils.currentProject();
+        if (project == null) {
+        	return;
+        }
         int newIndex = lastCommands(menu, index, project);
         if (newIndex > index) {
             new MenuItem(menu, SWT.SEPARATOR);

@@ -55,7 +55,10 @@ public class LaunchMenu extends ContributionItem {
         // You can also simply return if you do not want to show a menu
 
         IProject project = Utils.currentProject();
-        fill(menu, index, project);
+        if (project != null) {
+        	fill(menu, index, project);
+        }
+        
     }
 
     static void fill(final Menu menu, int index, IProject project) {

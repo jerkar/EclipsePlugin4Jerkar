@@ -18,6 +18,9 @@ class Utils {
         if (adaptable instanceof IResource) {
             return ((IResource) adaptable).getProject();
         }
+        if (adaptable == null) {
+        	return null;
+        }
         IProject iProject = adaptable.getAdapter(IProject.class);
         if (iProject == null) {
             IJavaElement iResource = adaptable.getAdapter(IJavaElement.class);
